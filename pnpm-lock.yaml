@@ -59,6 +59,9 @@ importers:
 
   packages/index-format:
     devDependencies:
+      '@gegenrede/shared':
+        specifier: workspace:*
+        version: link:../shared
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
