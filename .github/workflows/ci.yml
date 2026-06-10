@@ -55,6 +55,10 @@ jobs:
 
   gitleaks:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # gitleaks-action resolves the commit range of a PR via the pulls API.
+      pull-requests: read
     steps:
       - uses: actions/checkout@v4
         with:
