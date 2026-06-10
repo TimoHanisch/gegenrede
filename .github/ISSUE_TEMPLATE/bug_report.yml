@@ -1,0 +1,36 @@
+name: Bug report
+description: Something doesn't work as specified
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - extension
+        - services/api
+        - services/ingest
+        - index-format / snapshots
+        - docs / repo tooling
+        - not sure
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead? Please don't paste real post text or author handles — describe or anonymize them.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser + version, OS, extension version, Local or Server Mode, LLM preset (none/ollama/mistral/custom).
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Console output, anonymized screenshots. Reminder — post bodies are not logged by default; please keep them out of reports too.

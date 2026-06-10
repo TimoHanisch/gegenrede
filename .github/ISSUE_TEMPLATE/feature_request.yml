@@ -1,0 +1,25 @@
+name: Feature request
+description: Propose an improvement or new capability
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What can't you do today, or what is harder than it should be?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: checkboxes
+    id: guardrails
+    attributes:
+      label: Guardrails check
+      description: gegenrede has non-negotiable invariants (docs/GUARDRAILS.md). Requests that conflict with them — e.g. auto-posting — are closed per docs/GOVERNANCE.md; guardrail changes go through the ADR process instead (use the "Guardrail change proposal" template).
+      options:
+        - label: I have read docs/GUARDRAILS.md and this request does not conflict with G1–G8
+          required: true
