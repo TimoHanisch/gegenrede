@@ -18,6 +18,15 @@ export {
   type ReadSnapshotOptions,
 } from "./read.js";
 export {
+  SEARCH_CHUNK_ROWS,
+  searchSnapshot,
+  searchTopK,
+  type SearchableIndex,
+  type SearchHit,
+  type SearchOptions,
+  type SnapshotSearchHit,
+} from "./search.js";
+export {
   encodeSnapshot,
   writeSnapshot,
   type EncodedSnapshot,
