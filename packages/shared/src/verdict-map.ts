@@ -12,9 +12,9 @@ import { Verdict } from "./taxonomies.js";
 export const VERDICT_MAP: Record<string, Verdict> = {
   // EUvsDisinfo (spec §9.3 connector 2): every database entry is a
   // disinformation case, so its ratings map to false/misleading only.
-  // TODO(verify): rating strings taken from the euvsdisinfo connector's
-  // fixture sample (FIXTURE — UNVERIFIED SHAPE); confirm the real
-  // reviewRating values when the export shape is verified.
+  // TODO(verify): #70 — rating strings taken from the euvsdisinfo
+  // connector's fixture sample (FIXTURE — UNVERIFIED SHAPE); confirm the
+  // real reviewRating values when the export route is resolved.
   "euvsdisinfo:disinfo": "false",
   "euvsdisinfo:misleading": "misleading",
 };

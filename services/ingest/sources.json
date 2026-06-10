@@ -1,5 +1,5 @@
 {
-  "$comment": "Source lists for ingest connectors — configuration, never hardcoded (CLAUDE.md known-unknowns registry). TODO(verify): publisherSites are taken from public knowledge of the publishers' domains and have not been verified against live claims:search results; the rss section lands with #51. TODO(verify): euvsdisinfo.apiBaseUrl is the JSON-LD API base documented by the euvsdisinfoR wrapper (github.com/corriebar/euvsdisinfoR) but did not resolve from the dev environment on 2026-06-10 — confirm the current public export before enabling live pulls.",
+  "$comment": "Source lists for ingest connectors — configuration, never hardcoded (CLAUDE.md known-unknowns registry). TODO(verify): publisherSites are taken from public knowledge of the publishers' domains and have not been verified against live claims:search results; the rss section lands with #51. TODO(verify): #70 — euvsdisinfo.apiBaseUrl is the JSON-LD API base documented by the euvsdisinfoR wrapper (github.com/corriebar/euvsdisinfoR) but is likely retired; the export route decision is tracked in #70 — do not enable live pulls (incl. cron, #52) until it is resolved.",
   "googleFactcheck": {
     "publisherSites": [
       "correctiv.org",

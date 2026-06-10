@@ -40,7 +40,7 @@ Anything else: propose with a one-paragraph justification (what it does, bundle 
 ## Known-unknowns registry (handle per Hard Rule 3)
 
 - RSS/sitemap URLs for Correctiv, dpa-Faktencheck, AFP DE, BR24 Faktenfuchs → config file `services/ingest/sources.json`, fixtures only
-- EUvsDisinfo export format → fixture from a small manual sample, parser behind interface
+- EUvsDisinfo export → documented API (api.veedoo.io, per the euvsdisinfoR wrapper) likely retired since ~2020; connector stays fixture-only (parser behind interface), no live pulls or cron scheduling; route decision tracked in #70
 - Google Fact Check Tools API → response shape per official docs; key via `GOOGLE_FC_API_KEY`; integration test skipped without key
 - Mistral model strings / pricing → settings defaults marked `TODO(verify)`
 - X non-premium reply length → assume 280 (§17)

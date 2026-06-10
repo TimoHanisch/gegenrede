@@ -2,10 +2,10 @@
 // Copyright (C) 2026 gegenrede contributors
 
 // Integration-only — skipped unless EUVSDISINFO_LIVE_TEST is set
-// (CLAUDE.md known-unknowns registry): the export shape is unverified
-// (the documented host, api.veedoo.io, did not even resolve from the dev
-// environment on 2026-06-10), and hermetic CI never touches the network.
-// Hermetic coverage lives in ./euvsdisinfo.test.ts.
+// (CLAUDE.md known-unknowns registry): the export shape is unverified and
+// the documented host (api.veedoo.io) is likely retired — research and
+// route decision tracked in #70 — and hermetic CI never touches the
+// network. Hermetic coverage lives in ./euvsdisinfo.test.ts.
 
 import { describe, expect, it } from "vitest";
 
@@ -25,9 +25,9 @@ describe.skipIf(EUVSDISINFO_LIVE_TEST === undefined)(
       });
       const since = new Date(Date.now() - 30 * 86_400_000);
 
-      // TODO(verify): this is the check that retires the UNVERIFIED SHAPE
-      // label on the fixture — run it once the export endpoint is
-      // confirmed reachable, and compare the real member fields and
+      // TODO(verify): #70 — this is the check that retires the UNVERIFIED
+      // SHAPE label on the fixture — run it once the export endpoint is
+      // confirmed reachable (#70), and compare the real member fields and
       // reviewRating strings against fixture + VERDICT_MAP.
       const records = await connector.fetchSince(since);
       expect(Array.isArray(records)).toBe(true);

@@ -2,13 +2,13 @@
 // Copyright (C) 2026 gegenrede contributors
 
 // FIXTURE — UNVERIFIED SHAPE
-// TODO(verify): hand-assembled from the JSON-LD/Hydra shape documented by
-// the euvsdisinfoR API wrapper (github.com/corriebar/euvsdisinfoR), not
-// recorded from a live response (CLAUDE.md Hard Rule 3) — the documented
-// host did not resolve from the dev environment on 2026-06-10. Verify
-// against the live integration test once the export is reachable, then
-// also confirm the real `reviewRating` strings against the VERDICT_MAP
-// entries in packages/shared.
+// TODO(verify): #70 — hand-assembled from the JSON-LD/Hydra shape
+// documented by the euvsdisinfoR API wrapper
+// (github.com/corriebar/euvsdisinfoR), not recorded from a live response
+// (CLAUDE.md Hard Rule 3); the documented host is likely retired (see
+// #70 for the research and route options). Once #70 is resolved, verify
+// via the live integration test and confirm the real `reviewRating`
+// strings against the VERDICT_MAP entries in packages/shared.
 //
 // All content is synthetic: invented claims about "Exampleland",
 // example.org URLs, no real user handles (CLAUDE.md Testing discipline).

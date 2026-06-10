@@ -11,11 +11,11 @@
 // wrapper (github.com/corriebar/euvsdisinfoR): a JSON-LD/Hydra API with
 // `claims` and `claim_reviews` collections, `datePublished[after]`
 // filters, and `hydra:view` → `hydra:next` paging.
-// TODO(verify): the documented base (api.veedoo.io, sources.json) did not
-// resolve from the dev environment on 2026-06-10 — confirm the current
-// public export (endpoint, member fields, reviewRating strings), then
-// retire the UNVERIFIED SHAPE label on the fixture and the skip on the
-// live integration test.
+// TODO(verify): #70 — the documented base (api.veedoo.io, sources.json)
+// is likely retired (its documentation trail ends March 2020 and the host
+// failed via two independent network paths on 2026-06-10). The export
+// route decision is tracked in #70; once resolved, retire the UNVERIFIED
+// SHAPE label on the fixture and the skip on the live integration test.
 //
 // Hard Rule 5: claim text is never logged — warnings carry counts and
 // pull coordinates (collection path, page) only.
@@ -32,12 +32,12 @@ export const EUVSDISINFO_PUBLISHER = "EUvsDisinfo";
  * Every entry in the EUvsDisinfo database is by definition a
  * disinformation case, so a review without an explicit `reviewRating`
  * falls back to this string; the verdict mapping (§9.3: `false` /
- * `misleading`) lives in shared VERDICT_MAP. TODO(verify): real rating
- * strings are part of the unverified export shape.
+ * `misleading`) lives in shared VERDICT_MAP. TODO(verify): #70 — real
+ * rating strings are part of the unverified export shape.
  */
 export const EUVSDISINFO_DEFAULT_RATING = "disinfo";
 
-// TODO(verify): member shapes hand-assembled from the euvsdisinfoR
+// TODO(verify): #70 — member shapes hand-assembled from the euvsdisinfoR
 // wrapper's column names, not from a live response (CLAUDE.md Hard
 // Rule 3). Deliberately tolerant — every field is optional and unusable
 // members are skipped one by one (counted, never logged) instead of
@@ -88,8 +88,8 @@ export interface EuvsdisinfoConnectorOptions {
   /**
    * Language of the emitted records. EUvsDisinfo writes its claim
    * summaries and disproofs in English, so `en` is the default.
-   * TODO(verify): the export references per-case `/languages` IRIs; once
-   * the shape is verified those describe the *appearance* language —
+   * TODO(verify): #70 — the export references per-case `/languages` IRIs;
+   * once the shape is verified those describe the *appearance* language —
    * decide then whether to resolve them instead.
    */
   lang?: string;
