@@ -73,9 +73,7 @@ export type EuvsdisinfoReview = z.infer<typeof ReviewMember>;
 
 const HydraPage = z.object({
   "hydra:member": z.array(z.unknown()).optional(),
-  "hydra:view": z
-    .object({ "hydra:next": z.string().optional() })
-    .optional(),
+  "hydra:view": z.object({ "hydra:next": z.string().optional() }).optional(),
 });
 
 /** One Hydra collection page (fixture + stub typing). */

@@ -52,8 +52,7 @@ function stubFetch(
       input instanceof Request ? input.headers : init?.headers,
     );
     requests.push({ url, accept: headers.get("accept") });
-    const pages =
-      url.pathname === "/claim_reviews" ? reviewPages : claimsPages;
+    const pages = url.pathname === "/claim_reviews" ? reviewPages : claimsPages;
     const pageParam = url.searchParams.get("page");
     const index = pageParam === null ? 0 : Number(pageParam) - 1;
     return Promise.resolve(
@@ -115,8 +114,7 @@ describe("EuvsdisinfoConnector", () => {
     // claims → reviews direction, object-shaped reviewRating.
     const laboratories = records.find((r) => r.url === LABORATORIES_URL);
     expect(laboratories).toEqual({
-      claimText:
-        "Exampleland is allegedly running secret laboratories abroad.",
+      claimText: "Exampleland is allegedly running secret laboratories abroad.",
       ratingRaw: "disinfo",
       publisher: EUVSDISINFO_PUBLISHER,
       url: LABORATORIES_URL,
@@ -183,9 +181,9 @@ describe("EuvsdisinfoConnector", () => {
       maxPagesPerPull: 1,
     }).fetchSince(SINCE);
 
-    expect(
-      requests.filter((r) => r.url.pathname === "/claims"),
-    ).toHaveLength(1);
+    expect(requests.filter((r) => r.url.pathname === "/claims")).toHaveLength(
+      1,
+    );
     expect(
       warnings.filter((m) => m.includes("page cap (1) reached")),
     ).toHaveLength(1);
