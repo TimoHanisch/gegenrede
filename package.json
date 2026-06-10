@@ -14,6 +14,7 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "guardrails:gate": "node scripts/guardrails-grep-gate.mjs",
     "i18n:check": "node scripts/i18n-check.mjs",
     "headers:check": "node scripts/license-header-check.mjs"
   },
