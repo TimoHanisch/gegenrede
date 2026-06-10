@@ -9,7 +9,15 @@ import { Verdict } from "./taxonomies.js";
 // TODO(verify): real publisher rating strings (Correctiv, dpa-Faktencheck,
 // AFP DE, BR24 Faktenfuchs, …) are a known unknown; entries land with the
 // ingest fixtures rather than being invented here (CLAUDE.md Hard Rule 3).
-export const VERDICT_MAP: Record<string, Verdict> = {};
+export const VERDICT_MAP: Record<string, Verdict> = {
+  // EUvsDisinfo (spec §9.3 connector 2): every database entry is a
+  // disinformation case, so its ratings map to false/misleading only.
+  // TODO(verify): rating strings taken from the euvsdisinfo connector's
+  // fixture sample (FIXTURE — UNVERIFIED SHAPE); confirm the real
+  // reviewRating values when the export shape is verified.
+  "euvsdisinfo:disinfo": "false",
+  "euvsdisinfo:misleading": "misleading",
+};
 
 export function verdictMapKey(publisher: string, ratingRaw: string): string {
   return `${publisher}:${ratingRaw}`.toLowerCase();

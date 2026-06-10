@@ -34,4 +34,13 @@ export {
   type GoogleClaimsSearchPage,
   type GoogleFactcheckConnectorOptions,
 } from "./connectors/google-factcheck.js";
+export {
+  EUVSDISINFO_DEFAULT_RATING,
+  EUVSDISINFO_PUBLISHER,
+  EuvsdisinfoConnector,
+  type EuvsdisinfoClaim,
+  type EuvsdisinfoConnectorOptions,
+  type EuvsdisinfoHydraPage,
+  type EuvsdisinfoReview,
+} from "./connectors/euvsdisinfo.js";
 export { loadSources, SourcesConfig, SOURCES_PATH } from "./sources.js";
