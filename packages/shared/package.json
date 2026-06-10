@@ -5,16 +5,19 @@
   "type": "module",
   "license": "AGPL-3.0-only",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./embedding-node": "./src/embedding-node.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
+    "@huggingface/transformers": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "eslint": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

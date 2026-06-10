@@ -2,7 +2,16 @@ packages:
   - packages/*
   - services/*
 
+# onnxruntime-node's postinstall fetches its native binding; without it the
+# embedding integration path (services, EMBEDDING_INTEGRATION tests) cannot
+# run. protobufjs and sharp stay blocked — nothing in our runtime path needs
+# their build scripts.
+onlyBuiltDependencies:
+  - onnxruntime-node
+
 catalog:
+  "@huggingface/transformers": ^4.2.0
+  eslint: ^10.4.1
   typescript: ^5.9.3
   vitest: ^4.1.8
   zod: ^3.25.76
