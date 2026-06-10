@@ -1,5 +1,27 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 // Copyright (C) 2026 gegenrede contributors
 
-// Placeholder export so the package typechecks and tests until real code lands.
-export const PACKAGE_NAME = "@gegenrede/ingest" as const;
+export { RawFactCheck, type Connector } from "./connector.js";
+export {
+  dedupHash,
+  factcheckId,
+  normalizeRawFactCheck,
+  type NormalizedFactCheck,
+} from "./normalize.js";
+export { ingestRawFactChecks, type IngestCounters } from "./ingest.js";
+export {
+  InMemoryFactcheckStore,
+  type FactcheckRecord,
+  type FactcheckStore,
+  type UpsertOutcome,
+} from "./store.js";
+export {
+  factchecks,
+  type FactcheckInsert,
+  type FactcheckRow,
+} from "./db/schema.js";
+export {
+  DrizzleFactcheckStore,
+  connectIngestDatabase,
+  type IngestDatabase,
+} from "./db/store.js";

@@ -33,7 +33,7 @@ On any conflict between these sources, or between the spec and reality (an API t
 ## Approved dependency list (initial)
 
 Runtime: `wxt`, `preact`, `@preact/signals`, `zod`, `hono`, `@hono/node-server`, `drizzle-orm`, `postgres`, `@huggingface/transformers`, `onnxruntime-node`, `tinyld`.
-Dev/build: `typescript`, `vitest`, `happy-dom`, `@playwright/test`, `turbo`, `@changesets/cli`, `eslint` + `typescript-eslint`, `prettier`, `tsx`, `drizzle-kit`.
+Dev/build: `typescript`, `vitest`, `happy-dom`, `@playwright/test`, `turbo`, `@changesets/cli`, `eslint` + `typescript-eslint`, `prettier`, `tsx`, `drizzle-kit`, `@types/node` (types-only; approved in #11).
 Notably absent on purpose — do not add: React (use Preact), i18next (use the spec's <2 kB typed helper, §11), Tailwind (§7.1), axios (use fetch), any ORM other than Drizzle, any state library beyond signals.
 Anything else: propose with a one-paragraph justification (what it does, bundle cost, why not stdlib).
 
