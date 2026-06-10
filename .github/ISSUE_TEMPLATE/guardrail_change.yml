@@ -1,0 +1,43 @@
+name: Guardrail change proposal
+description: Propose changing one of the G1–G8 invariants (ADR process, docs/GOVERNANCE.md)
+labels: ["guardrails", "needs-adr"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Guardrail changes follow the ADR process: maintainer approval is required **before** any implementation, and the proposal must engage with the guardrail's documented rationale — "this would be easier without G1" is true and is not an argument (docs/GUARDRAILS.md, "For contributors").
+  - type: dropdown
+    id: guardrail
+    attributes:
+      label: Which guardrail?
+      options:
+        - G1 — No evidence, no draft
+        - G2 — No auto-posting, ever
+        - G3 — Every draft is different
+        - G4 — Tone floor
+        - G5 — Drafts fit the platform
+        - G6 — The source link stays visible
+        - G7 — Rate limits
+        - G8 — Friction before sending
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Proposed change
+    validations:
+      required: true
+  - type: textarea
+    id: rationale-engagement
+    attributes:
+      label: Engagement with the documented rationale
+      description: The guardrail exists for a stated reason (docs/GUARDRAILS.md, docs/disinformation-counter-framework.md §8.3). Why does that reasoning not apply, or what new consideration outweighs it?
+    validations:
+      required: true
+  - type: textarea
+    id: misuse
+    attributes:
+      label: Misuse analysis
+      description: How could the changed behavior be abused (astroturfing, CIB, harassment), and what bounds that?
+    validations:
+      required: true
