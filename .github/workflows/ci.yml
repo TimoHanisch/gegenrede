@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Copyright (C) 2026 gegenrede contributors
+
+# Base CI pipeline (spec §14): lint, typecheck, unit tests, i18n:check,
+# license-header check, gitleaks. Build, guardrail grep-gate, smoke and E2E
+# jobs land with their own issues (#4, #19, #32, #52).
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: i18n catalogs
+        run: pnpm i18n:check
+
+      - name: License headers
+        run: pnpm headers:check
+
+      - name: Formatting
+        run: pnpm format:check
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # gitleaks-action resolves the commit range of a PR via the pulls API.
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Gitleaks scans the full commit history, not just the checkout.
+          fetch-depth: 0
+
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

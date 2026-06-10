@@ -14,7 +14,8 @@
     "test": "turbo run test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "i18n:check": "node scripts/i18n-check.mjs"
+    "i18n:check": "node scripts/i18n-check.mjs",
+    "headers:check": "node scripts/license-header-check.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
