@@ -25,3 +25,13 @@ export {
   connectIngestDatabase,
   type IngestDatabase,
 } from "./db/store.js";
+export {
+  CLAIMS_SEARCH_ENDPOINT,
+  GOOGLE_FC_API_KEY_ENV,
+  GoogleFactcheckConnector,
+  maxAgeDaysSince,
+  type GoogleClaim,
+  type GoogleClaimsSearchPage,
+  type GoogleFactcheckConnectorOptions,
+} from "./connectors/google-factcheck.js";
+export { loadSources, SourcesConfig, SOURCES_PATH } from "./sources.js";

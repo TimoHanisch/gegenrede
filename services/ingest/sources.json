@@ -1,0 +1,11 @@
+{
+  "$comment": "Source lists for ingest connectors — configuration, never hardcoded (CLAUDE.md known-unknowns registry). TODO(verify): publisherSites are taken from public knowledge of the publishers' domains and have not been verified against live claims:search results; the rss section lands with #51.",
+  "googleFactcheck": {
+    "publisherSites": [
+      "correctiv.org",
+      "dpa-factchecking.com",
+      "faktencheck.afp.com",
+      "br.de"
+    ]
+  }
+}
