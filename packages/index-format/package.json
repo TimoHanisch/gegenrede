@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
+    "@gegenrede/shared": "workspace:*",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }
