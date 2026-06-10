@@ -12,6 +12,12 @@ export {
   type EmbedKind,
   type EmbeddingProvider,
 } from "./embedding.js";
+export { CLEANUP_MAX_TOKENS, cleanPostText } from "./cleanup.js";
+export {
+  LANGUAGE_CONFIDENCE_THRESHOLD,
+  detectPostLanguage,
+  type LanguageDetection,
+} from "./detect-language.js";
 export { Technique, Verdict } from "./taxonomies.js";
 export { CheckResult, ExtractedPost, FactCheckMatch } from "./core-types.js";
 export { VERDICT_MAP, mapVerdict, verdictMapKey } from "./verdict-map.js";
