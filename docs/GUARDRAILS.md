@@ -14,7 +14,7 @@ The reply composer can only be invoked on a claim that has a matched professiona
 
 ### G2 — No auto-posting, ever
 
-The tool never holds posting credentials, never calls a platform write API, and never synthetically submits a form. Its output ends at the user's clipboard or a prefilled compose box. A human reads, edits, and presses send — under their own name, on their own account. This is enforced architecturally (no such API surface exists in the codebase) and by a CI gate that fails any commit introducing platform write endpoints.
+The tool never holds posting credentials, never calls a platform write API, and never synthetically submits a form. Its output ends at the user's clipboard or a prefilled compose box. A human reads, edits, and presses send — under their own name, on their own account. This is enforced architecturally (no such API surface exists in the codebase) and by a CI gate that fails any commit introducing platform write endpoints. That gate is `.github/workflows/guardrails.yml` (the G2 grep-gate, runnable locally via `pnpm guardrails:gate`): it runs on every pull request and push to `main`, self-tests its patterns against a known-bad corpus on each run, and is never adjusted to let code pass. Legitimate textual mentions are excused only through the gate's minimal path allowlist or a justified `g2-allow:` line marker, which the gate reports in every CI log.
 
 **Why:** three independent reasons. *Legal/ethical attribution:* the human is the speaker; the tool is stationery. *Platform terms:* automated posting violates the ToS of every targeted platform and would expose users to bans. *Integrity:* an auto-posting fork of this codebase is a bot network by definition — see G3.
 

@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: AGPL-3.0-only
+# Copyright (C) 2026 gegenrede contributors
+
+# G2 grep-gate (spec §10.4 G2, §14; GUARDRAILS.md G2; CLAUDE.md Hard Rule 1):
+# fails any commit introducing platform write-API calls or synthetic
+# form-submission code. If this gate blocks a change, the change is wrong —
+# this gate is never adjusted to let code pass.
+
+name: guardrails
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: guardrails-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  g2-grep-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      # Dependency-free: runs the pattern self-test, then scans every
+      # tracked file. No pnpm install needed.
+      - name: G2 grep-gate (self-test + scan)
+        run: node scripts/guardrails-grep-gate.mjs
