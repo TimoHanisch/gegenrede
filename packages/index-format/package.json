@@ -9,7 +9,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "bench": "GGX_BENCH=1 vitest run src/search-benchmark.test.ts --disable-console-intercept"
   },
   "devDependencies": {
     "@gegenrede/shared": "workspace:*",
