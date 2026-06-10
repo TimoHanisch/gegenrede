@@ -23,9 +23,9 @@ Matching is cross-lingual: a German post can match an English or French fact-che
 ## Project status
 
 <!-- AGENT-MAINTAINED:STATUS — update this section as milestones complete; do not edit anything outside marked sections -->
-**Pre-implementation.** The research framework, architecture, and full implementation spec are complete (see [Documentation](#documentation)); code lands milestone by milestone:
+**M0 complete.** The research framework, architecture, and full implementation spec are complete (see [Documentation](#documentation)); code lands milestone by milestone. M0 closed with CI green at [`f491850`](https://github.com/TimoHanisch/gegenrede/commit/f491850):
 
-- [ ] **M0** — repo scaffold, CI, shared schemas
+- [x] **M0** — repo scaffold, CI, shared schemas
 - [ ] **M1** — ingest pipeline, index format, golden-set evaluation *(go/no-go gate: ≥80% recall@5 on real viral German misinformation)*
 - [ ] **M2** — extension with Local-Mode matching (X, Reddit, any webpage)
 - [ ] **M3** — reply composer with full guardrails
