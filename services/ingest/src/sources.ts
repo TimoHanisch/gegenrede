@@ -15,6 +15,9 @@ export const SourcesConfig = z.object({
   googleFactcheck: z.object({
     publisherSites: z.array(z.string().min(1)).min(1),
   }),
+  euvsdisinfo: z.object({
+    apiBaseUrl: z.string().url(),
+  }),
 });
 export type SourcesConfig = z.infer<typeof SourcesConfig>;
 

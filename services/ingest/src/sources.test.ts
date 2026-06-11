@@ -15,10 +15,29 @@ describe("loadSources", () => {
     }
   });
 
+  it("parses the committed sources.json with a full euvsdisinfo API base URL", () => {
+    const sources = loadSources();
+    expect(sources.euvsdisinfo.apiBaseUrl).toMatch(/^https:\/\//);
+  });
+
   it("rejects a config without publisher sites", () => {
     expect(() => SourcesConfig.parse({})).toThrow();
     expect(() =>
       SourcesConfig.parse({ googleFactcheck: { publisherSites: [] } }),
+    ).toThrow();
+  });
+
+  it("rejects a config without an euvsdisinfo API base URL", () => {
+    expect(() =>
+      SourcesConfig.parse({
+        googleFactcheck: { publisherSites: ["factcheck.example.org"] },
+      }),
+    ).toThrow();
+    expect(() =>
+      SourcesConfig.parse({
+        googleFactcheck: { publisherSites: ["factcheck.example.org"] },
+        euvsdisinfo: { apiBaseUrl: "not-a-url" },
+      }),
     ).toThrow();
   });
 });

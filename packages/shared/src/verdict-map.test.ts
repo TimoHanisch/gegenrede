@@ -39,4 +39,15 @@ describe("mapVerdict", () => {
       "unproven",
     );
   });
+
+  it("maps EUvsDisinfo ratings to false/misleading only (§9.3)", () => {
+    const warn = vi.fn();
+    expect(mapVerdict("EUvsDisinfo", "disinfo", warn)).toBe("false");
+    expect(mapVerdict("EUvsDisinfo", "Misleading", warn)).toBe("misleading");
+    expect(warn).not.toHaveBeenCalled();
+    // Anything outside their schema still takes the §4.1 fallback.
+    expect(mapVerdict("EUvsDisinfo", "unexpected rating", vi.fn())).toBe(
+      "unproven",
+    );
+  });
 });
