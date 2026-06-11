@@ -51,6 +51,7 @@ function config(overrides: Partial<HarvestConfig> = {}): HarvestConfig {
   return {
     lang: "de",
     since: new Date("2026-01-01T00:00:00.000Z"),
+    connector: "google",
     sites: [],
     out: "unset.jsonl",
     force: false,
@@ -71,9 +72,22 @@ describe("parseHarvestArgs", () => {
     const parsed = parseHarvestArgs(["--lang", "de", "--since", "2026-01-01"]);
     expect(parsed.lang).toBe("de");
     expect(parsed.since.toISOString()).toBe("2026-01-01T00:00:00.000Z");
+    expect(parsed.connector).toBe("google");
     expect(parsed.sites).toEqual([]);
     expect(parsed.force).toBe(false);
     expect(parsed.out.endsWith("candidates-de.jsonl")).toBe(true);
+  });
+
+  it("selects the euvsdisinfo connector for english pulls", () => {
+    const parsed = parseHarvestArgs([
+      "--lang",
+      "en",
+      "--since",
+      "2026-01-01",
+      "--connector",
+      "euvsdisinfo",
+    ]);
+    expect(parsed.connector).toBe("euvsdisinfo");
   });
 
   it("collects repeated --site flags", () => {
@@ -97,6 +111,19 @@ describe("parseHarvestArgs", () => {
     [["--lang", "de", "--since", "01.06.2026"], "non-ISO --since"],
     [["--lang", "de", "--since", "2026-13-45"], "impossible --since"],
     [["--lang", "de", "--since", "2026-01-01", "--bogus"], "unknown flag"],
+    [
+      ["--lang", "de", "--since", "2026-01-01", "--connector", "rss"],
+      "unknown --connector",
+    ],
+    [
+      ["--lang", "de", "--since", "2026-01-01", "--connector", "euvsdisinfo"],
+      "euvsdisinfo is en-only (#70)",
+    ],
+    [
+      // prettier-ignore
+      ["--lang", "en", "--since", "2026-01-01", "--connector", "euvsdisinfo", "--site", "a.example"],
+      "euvsdisinfo takes no --site",
+    ],
   ])("rejects %j (%s)", (argv) => {
     try {
       parseHarvestArgs(argv as string[]);

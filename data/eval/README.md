@@ -75,17 +75,26 @@ output reports locations as `file:line` and never echoes claim text.
 ```
 pnpm harvest --lang de --since 2026-05-01
 pnpm harvest --lang de --since 2026-05-01 --site some-other-publisher.example
+pnpm harvest --lang en --since 2026-05-01 --connector euvsdisinfo --out data/eval/candidates-en-euvsdisinfo.jsonl
 ```
 
-Pulls ClaimReview records from the Google Fact Check Tools API (reusing the
-ingest connector; `GOOGLE_FC_API_KEY` required, env only) into a staging
-file `candidates-<lang>.jsonl` — **gitignored, never committed, never read
-by the eval**. Each candidate pre-fills `claim`/`expectedUrl`/`lang`/`source`
-plus review helpers (`rating`, `publishedAt`). Defaults to the
-`sources.json` publisher sites (in-index → positive candidates); pass
-`--site` with non-ingested publishers to find negative candidates. An
-existing staging file is never overwritten without `--force`; URLs already
-curated in the golden sets are skipped.
+Pulls records through an ingest connector into a staging file
+`candidates-<lang>.jsonl` — **gitignored, never committed, never read by
+the eval**. Each candidate pre-fills `claim`/`expectedUrl`/`lang`/`source`
+plus review helpers (`rating`, `publishedAt`). An existing staging file is
+never overwritten without `--force` (use `--out` for separate batches);
+URLs already curated in the golden sets are skipped.
+
+Connectors:
+
+- `google` (default) — Google Fact Check Tools API (`GOOGLE_FC_API_KEY`
+  required, env only). Defaults to the `sources.json` publisher sites
+  (in-index → positive candidates); pass `--site` with non-ingested
+  publishers to find negative candidates.
+- `euvsdisinfo` — the EUvsDisinfo database (en only, no key); the main
+  source of in-index English content. The live export route is unresolved
+  (#70) — until then this pull is expected to fail against the configured
+  base URL.
 
 **The harvested claim text must not be promoted verbatim.** It is the
 fact-checker's ClaimReview phrasing — the same text the index embeds — so

@@ -19,6 +19,7 @@ import path from "node:path";
 import { parseArgs } from "node:util";
 
 import {
+  EuvsdisinfoConnector,
   GoogleFactcheckConnector,
   loadSources,
   type Connector,
@@ -38,13 +39,15 @@ into a staging file for human review. Never writes golden-*.jsonl.
 Options:
   --lang <de|en>      candidate language (required)
   --since <date>      review-date window start, YYYY-MM-DD (required)
-  --site <domain>     publisher domain for the pull; repeatable
+  --connector <name>  google (default) or euvsdisinfo (en only, no API key;
+                      live export route pending #70)
+  --site <domain>     publisher domain for the pull; repeatable; google only
                       (default: sources.json googleFactcheck.publisherSites —
                       pass non-ingested publishers to find NEGATIVE candidates)
   --out <path>        staging file (default: data/eval/candidates-<lang>.jsonl)
   --force             overwrite an existing staging file
 
-Requires GOOGLE_FC_API_KEY in the environment (Hard Rule 4).`;
+--connector google requires GOOGLE_FC_API_KEY in the env (Hard Rule 4).`;
 
 /**
  * One staging line. `claim` is the fact-checker's phrasing — REPHRASE it to
@@ -67,7 +70,8 @@ export type CandidateItem = z.infer<typeof CandidateItem>;
 export interface HarvestConfig {
   lang: "de" | "en";
   since: Date;
-  /** Empty = sources.json googleFactcheck.publisherSites. */
+  connector: "google" | "euvsdisinfo";
+  /** Empty = sources.json googleFactcheck.publisherSites. Google only. */
   sites: string[];
   out: string;
   force: boolean;
@@ -81,6 +85,7 @@ export function parseHarvestArgs(argv: string[]): HarvestConfig {
       options: {
         lang: { type: "string" },
         since: { type: "string" },
+        connector: { type: "string" },
         site: { type: "string", multiple: true },
         out: { type: "string" },
         force: { type: "boolean" },
@@ -97,6 +102,26 @@ export function parseHarvestArgs(argv: string[]): HarvestConfig {
   if (values.lang !== "de" && values.lang !== "en") {
     throw new EvalError("usage", "--lang must be de or en");
   }
+  const connector = values.connector ?? "google";
+  if (connector !== "google" && connector !== "euvsdisinfo") {
+    throw new EvalError("usage", "--connector must be google or euvsdisinfo");
+  }
+  if (connector === "euvsdisinfo") {
+    if ((values.site ?? []).length > 0) {
+      throw new EvalError(
+        "usage",
+        "--site only applies to --connector google — EUvsDisinfo is a single database",
+      );
+    }
+    // The export's claim summaries are written in English; per-appearance
+    // languages are part of the unverified shape (#70). Revisit then.
+    if (values.lang !== "en") {
+      throw new EvalError(
+        "usage",
+        "--connector euvsdisinfo only supports --lang en (see #70)",
+      );
+    }
+  }
   if (values.since === undefined || !/^\d{4}-\d{2}-\d{2}$/.test(values.since)) {
     throw new EvalError("usage", "--since <YYYY-MM-DD> is required");
   }
@@ -108,11 +133,27 @@ export function parseHarvestArgs(argv: string[]): HarvestConfig {
   return {
     lang: values.lang,
     since,
+    connector,
     sites: values.site ?? [],
     out:
       values.out ?? path.join(PACKAGE_ROOT, `candidates-${values.lang}.jsonl`),
     force: values.force ?? false,
   };
+}
+
+function defaultConnector(config: HarvestConfig): Connector {
+  if (config.connector === "euvsdisinfo") {
+    return new EuvsdisinfoConnector({
+      apiBaseUrl: loadSources().euvsdisinfo.apiBaseUrl,
+    });
+  }
+  return new GoogleFactcheckConnector({
+    publisherSites:
+      config.sites.length > 0
+        ? config.sites
+        : loadSources().googleFactcheck.publisherSites,
+    languages: [config.lang],
+  });
 }
 
 export interface HarvestOutcome {
@@ -178,15 +219,7 @@ export async function runHarvest(
     );
   }
 
-  const connector =
-    options.connector ??
-    new GoogleFactcheckConnector({
-      publisherSites:
-        config.sites.length > 0
-          ? config.sites
-          : loadSources().googleFactcheck.publisherSites,
-      languages: [config.lang],
-    });
+  const connector = options.connector ?? defaultConnector(config);
 
   const curated = await curatedUrls(
     options.goldenFiles ?? (await discoverGoldenFiles()),
