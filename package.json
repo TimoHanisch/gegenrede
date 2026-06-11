@@ -12,6 +12,7 @@
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
     "test": "turbo run test",
+    "eval": "pnpm --filter @gegenrede/eval eval",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "guardrails:gate": "node scripts/guardrails-grep-gate.mjs",
