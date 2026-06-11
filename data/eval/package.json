@@ -1,0 +1,23 @@
+{
+  "name": "@gegenrede/eval",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "eval": "tsx src/bin.ts"
+  },
+  "dependencies": {
+    "@gegenrede/index-format": "workspace:*",
+    "@gegenrede/shared": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

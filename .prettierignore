@@ -2,6 +2,8 @@ node_modules/
 dist/
 .turbo/
 pnpm-lock.yaml
+# Generated eval artifacts are committed as-is (issue #14)
+data/eval/reports/
 # Normative docs and the root README are not reformatted by tooling
 docs/
 README.md
