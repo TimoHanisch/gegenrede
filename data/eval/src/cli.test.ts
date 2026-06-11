@@ -13,7 +13,12 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { resetEmbedding } from "@gegenrede/shared";
 
-import { main, parseCliArgs } from "./cli.js";
+import {
+  main,
+  parseCliArgs,
+  type CliConfig,
+  type EvalCliConfig,
+} from "./cli.js";
 import { EvalError } from "./errors.js";
 import type { EvalReport } from "./report.js";
 import {
@@ -33,9 +38,16 @@ function expectUsage(run: () => unknown): void {
   throw new Error("expected an EvalError with code usage");
 }
 
+function asEvalConfig(config: CliConfig): EvalCliConfig {
+  if (config.mode !== "eval") {
+    throw new Error("expected an eval-mode config");
+  }
+  return config;
+}
+
 describe("parseCliArgs", () => {
   it("applies the spec defaults", () => {
-    const config = parseCliArgs(["--snapshot", "snap.ggx"]);
+    const config = asEvalConfig(parseCliArgs(["--snapshot", "snap.ggx"]));
     expect(config.snapshotPath).toBe("snap.ggx");
     expect(config.threshold).toBe(0.82);
     expect(config.topK).toBe(5);
@@ -58,6 +70,23 @@ describe("parseCliArgs", () => {
 
   it("requires --snapshot", () => {
     expectUsage(() => parseCliArgs([]));
+  });
+
+  it("parses --validate with optional --golden", () => {
+    expect(parseCliArgs(["--validate"])).toEqual({
+      mode: "validate",
+      goldenPaths: [],
+    });
+    expect(parseCliArgs(["--validate", "--golden", "a.jsonl"])).toEqual({
+      mode: "validate",
+      goldenPaths: ["a.jsonl"],
+    });
+  });
+
+  it("rejects eval-only flags combined with --validate", () => {
+    expectUsage(() => parseCliArgs(["--validate", "--snapshot", "s.ggx"]));
+    expectUsage(() => parseCliArgs(["--validate", "--threshold", "0.9"]));
+    expectUsage(() => parseCliArgs(["--validate", "--out", "reports"]));
   });
 
   it("rejects a threshold outside [0, 1] or non-numeric", () => {
@@ -228,5 +257,72 @@ describe("main", () => {
     ) as EvalReport;
     expect(report.snapshot.sha256Source).toBe("self-computed");
     expect(report.snapshot.sha256).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it("--validate exits 0 on a well-formed golden file", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "gegenrede-eval-"));
+    const golden = path.join(dir, "golden.jsonl");
+    await writeFile(
+      golden,
+      [
+        JSON.stringify({
+          claim: "Die fiktive Stadt Beispielhausen hat alle Autos verboten.",
+          expectedUrl: "https://factcheck.example.org/artikel/1",
+          lang: "de",
+          source: "factcheck.example.org",
+        }),
+        JSON.stringify({
+          claim: "An invented club presented a fictitious new logo.",
+          expectedUrl: null,
+          lang: "en",
+          source: "factcheck.example.org",
+        }),
+      ].join("\n") + "\n",
+    );
+    const lines: string[] = [];
+    const code = await main(["--validate", "--golden", golden], {
+      log: (line) => lines.push(line),
+    });
+    expect(code).toBe(0);
+    const output = lines.join("\n");
+    expect(output).toContain("validation passed");
+    expect(output).toContain("factcheck.example.org ×2");
+  });
+
+  it("--validate exits 1 and lists every problem in a broken file", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "gegenrede-eval-"));
+    const golden = path.join(dir, "golden.jsonl");
+    await writeFile(
+      golden,
+      [
+        "{broken",
+        JSON.stringify({
+          claim: "Erfundene Behauptung ohne Quelle.",
+          expectedUrl: null,
+          lang: "de",
+        }),
+      ].join("\n") + "\n",
+    );
+    const lines: string[] = [];
+    const code = await main(["--validate", "--golden", golden], {
+      log: (line) => lines.push(line),
+    });
+    expect(code).toBe(1);
+    const output = lines.join("\n");
+    expect(output).toContain(`${golden}:1 is not valid JSON`);
+    expect(output).toContain(`${golden}:2 is missing "source"`);
+    expect(output).toContain("validation FAILED — 2 error(s)");
+  });
+
+  it("--validate exits 1 on an empty golden set, pointing at #15", async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "gegenrede-eval-"));
+    const golden = path.join(dir, "empty.jsonl");
+    await writeFile(golden, "");
+    const lines: string[] = [];
+    const code = await main(["--validate", "--golden", golden], {
+      log: (line) => lines.push(line),
+    });
+    expect(code).toBe(1);
+    expect(lines.join("\n")).toContain("#15");
   });
 });
