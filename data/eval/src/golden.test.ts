@@ -90,6 +90,31 @@ describe("golden item schema", () => {
     expectBadGolden(() => parseGoldenLine(line, "f", 1), 'at "claim"');
   });
 
+  it("accepts per-item provenance via source (#15)", () => {
+    const line = JSON.stringify({
+      claim: "Erfundene Behauptung mit Quelle.",
+      expectedUrl: null,
+      lang: "de",
+      source: "factcheck.example.org",
+    });
+    const item = parseGoldenLine(line, "f", 1);
+    expect(item.source).toBe("factcheck.example.org");
+  });
+
+  it("keeps source optional — eval runs are unaffected (#15)", () => {
+    expect(parseGoldenLine(POSITIVE, "f", 1).source).toBeUndefined();
+  });
+
+  it("rejects a blank source", () => {
+    const line = JSON.stringify({
+      claim: "Erfundene Behauptung.",
+      expectedUrl: null,
+      lang: "de",
+      source: " ",
+    });
+    expectBadGolden(() => parseGoldenLine(line, "f", 1), 'at "source"');
+  });
+
   it("rejects a line that is not JSON", () => {
     expectBadGolden(
       () => parseGoldenLine("{nope", "f", 9),

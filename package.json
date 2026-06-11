@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "test": "turbo run test",
     "eval": "pnpm --filter @gegenrede/eval eval",
+    "harvest": "pnpm --filter @gegenrede/eval harvest",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "guardrails:gate": "node scripts/guardrails-grep-gate.mjs",

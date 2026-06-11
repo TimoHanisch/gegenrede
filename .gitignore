@@ -5,3 +5,7 @@ dist/
 .env
 .env.*
 !.env.example
+
+# Golden-set candidate staging (#15) — harvested for human review, promoted
+# by hand into golden-*.jsonl; the raw harvest is never committed.
+data/eval/candidates-*.jsonl

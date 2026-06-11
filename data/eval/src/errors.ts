@@ -10,7 +10,8 @@ export type EvalErrorCode =
   | "usage" // bad CLI arguments
   | "no-golden" // no golden set found or zero items (curation lands with #15)
   | "bad-golden" // a golden JSONL line fails parsing or the schema
-  | "bad-claim"; // a golden claim cleans to empty text (curation bug)
+  | "bad-claim" // a golden claim cleans to empty text (curation bug)
+  | "harvest"; // candidate-harvester operational failure (#15 staging tool)
 
 export class EvalError extends Error {
   readonly code: EvalErrorCode;

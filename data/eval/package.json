@@ -7,10 +7,12 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "eval": "tsx src/bin.ts"
+    "eval": "tsx src/bin.ts",
+    "harvest": "tsx src/harvest-bin.ts"
   },
   "dependencies": {
     "@gegenrede/index-format": "workspace:*",
+    "@gegenrede/ingest": "workspace:*",
     "@gegenrede/shared": "workspace:*",
     "zod": "catalog:"
   },

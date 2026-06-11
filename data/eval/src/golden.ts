@@ -7,17 +7,38 @@
 // aborts on the first bad line — it never skips one, because a silently
 // dropped item would skew the reported metrics.
 
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { z } from "zod";
 
 import { EvalError } from "./errors.js";
+
+/** data/eval — golden sets, candidate staging, and reports live here. */
+export const PACKAGE_ROOT = path.resolve(
+  fileURLToPath(import.meta.url),
+  "../..",
+);
+
+/** Every committed golden set: data/eval/golden-*.jsonl, sorted. */
+export async function discoverGoldenFiles(): Promise<string[]> {
+  const entries = await readdir(PACKAGE_ROOT);
+  return entries
+    .filter((name) => /^golden-.*\.jsonl$/.test(name))
+    .sort()
+    .map((name) => path.join(PACKAGE_ROOT, name));
+}
 
 /**
  * One golden item, one JSONL line. `expectedUrl` is the fact-check URL the
  * pipeline is expected to retrieve (in-index positive); `null` marks an
  * out-of-index negative that must stay below the match threshold. `strict`
  * so a curation typo (unknown key) fails loudly instead of being ignored.
+ *
+ * `source` is the item's provenance — which fact-checker archive the claim
+ * was collected from (#15). Optional here so existing eval runs are
+ * unaffected, but `pnpm eval --validate` requires it on every item.
  */
 export const GoldenItem = z
   .object({
@@ -26,6 +47,10 @@ export const GoldenItem = z
       .refine((value) => value.trim().length > 0, "claim must not be blank"),
     expectedUrl: z.string().url().nullable(),
     lang: z.enum(["de", "en"]),
+    source: z
+      .string()
+      .refine((value) => value.trim().length > 0, "source must not be blank")
+      .optional(),
   })
   .strict();
 
@@ -37,17 +62,21 @@ export interface LoadedGoldenItem extends GoldenItem {
   line: number;
 }
 
-/** Parses one JSONL line; throws EvalError("bad-golden") with file:line. */
-export function parseGoldenLine(
-  line: string,
-  file: string,
-  lineNo: number,
-): LoadedGoldenItem {
+export type GoldenLineResult =
+  | { ok: true; item: GoldenItem }
+  | { ok: false; problem: string };
+
+/**
+ * Checks one JSONL line against the golden schema without throwing. The
+ * `problem` string is phrased to follow a "file:line" location prefix —
+ * the eval loader turns it into an EvalError, the #15 validator collects it.
+ */
+export function checkGoldenLine(line: string): GoldenLineResult {
   let json: unknown;
   try {
     json = JSON.parse(line);
   } catch {
-    throw new EvalError("bad-golden", `${file}:${lineNo} is not valid JSON`);
+    return { ok: false, problem: "is not valid JSON" };
   }
   const parsed = GoldenItem.safeParse(json);
   if (!parsed.success) {
@@ -56,12 +85,40 @@ export function parseGoldenLine(
       issue !== undefined && issue.path.length > 0
         ? ` at "${issue.path.join(".")}"`
         : "";
-    throw new EvalError(
-      "bad-golden",
-      `${file}:${lineNo} fails the golden schema${at}: ${issue?.message ?? "invalid"}`,
-    );
+    return {
+      ok: false,
+      problem: `fails the golden schema${at}: ${issue?.message ?? "invalid"}`,
+    };
   }
-  return { ...parsed.data, file, line: lineNo };
+  return { ok: true, item: parsed.data };
+}
+
+/** Parses one JSONL line; throws EvalError("bad-golden") with file:line. */
+export function parseGoldenLine(
+  line: string,
+  file: string,
+  lineNo: number,
+): LoadedGoldenItem {
+  const result = checkGoldenLine(line);
+  if (!result.ok) {
+    throw new EvalError("bad-golden", `${file}:${lineNo} ${result.problem}`);
+  }
+  return { ...result.item, file, line: lineNo };
+}
+
+/**
+ * Splits JSONL text into lines, tolerating CRLF endings and one trailing
+ * newline. Interior blank lines are preserved as "" — how to treat them is
+ * the caller's policy (the loader aborts, the validator records and goes on).
+ */
+export function splitJsonlLines(text: string): string[] {
+  const body = text.endsWith("\n") ? text.slice(0, -1) : text;
+  if (body === "") {
+    return [];
+  }
+  return body
+    .split("\n")
+    .map((line) => (line.endsWith("\r") ? line.slice(0, -1) : line));
 }
 
 /**
@@ -73,12 +130,7 @@ export async function loadGoldenFile(
   path: string,
 ): Promise<LoadedGoldenItem[]> {
   const text = await readFile(path, "utf8");
-  const body = text.endsWith("\n") ? text.slice(0, -1) : text;
-  if (body === "") {
-    return [];
-  }
-  return body.split("\n").map((rawLine, index) => {
-    const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine;
+  return splitJsonlLines(text).map((line, index) => {
     if (line === "") {
       throw new EvalError("bad-golden", `${path}:${index + 1} is a blank line`);
     }

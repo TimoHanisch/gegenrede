@@ -7,11 +7,14 @@
 // regardless of whether the §14 targets were met — judging the numbers is
 // the human gate (#17), not this tool. Exit code 1 is reserved for usage
 // and operational errors.
+//
+// `--validate` (issue #15) is the exception: it checks the golden sets
+// themselves (schema, provenance, handles, duplicates) with no snapshot or
+// embedding, and exits 1 when validation fails — it IS the gate there.
 
 import { createHash } from "node:crypto";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 import { readSnapshot, type GgxSnapshot } from "@gegenrede/index-format";
@@ -24,7 +27,12 @@ import {
 } from "@gegenrede/shared";
 
 import { EvalError } from "./errors.js";
-import { loadGoldenFile, type LoadedGoldenItem } from "./golden.js";
+import {
+  PACKAGE_ROOT,
+  discoverGoldenFiles,
+  loadGoldenFile,
+  type LoadedGoldenItem,
+} from "./golden.js";
 import {
   buildReport,
   renderMarkdown,
@@ -38,11 +46,10 @@ import {
   runEval,
   type EvalRun,
 } from "./run-eval.js";
-
-// data/eval — golden sets and the default report directory live here.
-const PACKAGE_ROOT = path.resolve(fileURLToPath(import.meta.url), "../..");
+import { renderValidationReport, validateGoldenFiles } from "./validate.js";
 
 const USAGE = `Usage: pnpm eval --snapshot <path.ggx> [options]
+       pnpm eval --validate [--golden <path>]
 
 Options:
   --snapshot <path>   .ggx snapshot to evaluate against (required)
@@ -53,9 +60,12 @@ Options:
                       measured, manifest integrity is NOT verified)
   --threshold <n>     match threshold in [0, 1] (default: ${DEFAULT_THRESHOLD}, spec §8)
   --top-k <n>         hits per query, the K in recall@K (default: ${DEFAULT_TOP_K}, spec §14)
-  --out <dir>         report directory (default: data/eval/reports)`;
+  --out <dir>         report directory (default: data/eval/reports)
+  --validate          check the golden sets themselves (#15): schema,
+                      provenance, handles, duplicates — no snapshot needed`;
 
-export interface CliConfig {
+export interface EvalCliConfig {
+  mode: "eval";
   snapshotPath: string;
   sha256?: string;
   /** Empty = discover golden-*.jsonl in the package root. */
@@ -64,6 +74,14 @@ export interface CliConfig {
   topK: number;
   outDir: string;
 }
+
+export interface ValidateCliConfig {
+  mode: "validate";
+  /** Empty = discover golden-*.jsonl in the package root. */
+  goldenPaths: string[];
+}
+
+export type CliConfig = EvalCliConfig | ValidateCliConfig;
 
 export function parseCliArgs(argv: string[]): CliConfig {
   let values;
@@ -77,6 +95,7 @@ export function parseCliArgs(argv: string[]): CliConfig {
         threshold: { type: "string" },
         "top-k": { type: "string" },
         out: { type: "string" },
+        validate: { type: "boolean" },
       },
       strict: true,
     }));
@@ -85,6 +104,22 @@ export function parseCliArgs(argv: string[]): CliConfig {
       "usage",
       error instanceof Error ? error.message : String(error),
     );
+  }
+
+  if (values.validate === true) {
+    // Rejected (not ignored) so a typo'd eval invocation can't silently
+    // turn into a much weaker format check.
+    const unused = (
+      ["snapshot", "sha256", "threshold", "top-k", "out"] as const
+    ).filter((flag) => values[flag] !== undefined);
+    if (unused.length > 0) {
+      throw new EvalError(
+        "usage",
+        `${unused.map((flag) => `--${flag}`).join(", ")} ` +
+          `${unused.length === 1 ? "has" : "have"} no effect with --validate`,
+      );
+    }
+    return { mode: "validate", goldenPaths: values.golden ?? [] };
   }
 
   if (values.snapshot === undefined) {
@@ -112,6 +147,7 @@ export function parseCliArgs(argv: string[]): CliConfig {
   }
 
   return {
+    mode: "eval",
     snapshotPath: values.snapshot,
     ...(values.sha256 === undefined ? {} : { sha256: values.sha256 }),
     goldenPaths: values.golden ?? [],
@@ -119,14 +155,6 @@ export function parseCliArgs(argv: string[]): CliConfig {
     topK,
     outDir: values.out ?? path.join(PACKAGE_ROOT, "reports"),
   };
-}
-
-async function discoverGoldenFiles(): Promise<string[]> {
-  const entries = await readdir(PACKAGE_ROOT);
-  return entries
-    .filter((name) => /^golden-.*\.jsonl$/.test(name))
-    .sort()
-    .map((name) => path.join(PACKAGE_ROOT, name));
 }
 
 function goldenInfoOf(
@@ -182,6 +210,15 @@ export async function main(
           "The golden sets are human-curated and land with issue #15.",
       );
     }
+
+    if (config.mode === "validate") {
+      const result = await validateGoldenFiles(goldenFiles);
+      for (const line of renderValidationReport(result, goldenFiles.length)) {
+        log(line);
+      }
+      return result.errors.length === 0 ? 0 : 1;
+    }
+
     const items = (
       await Promise.all(goldenFiles.map((file) => loadGoldenFile(file)))
     ).flat();
