@@ -68,6 +68,9 @@ importers:
       '@gegenrede/index-format':
         specifier: workspace:*
         version: link:../../packages/index-format
+      '@gegenrede/ingest':
+        specifier: workspace:*
+        version: link:../../services/ingest
       '@gegenrede/shared':
         specifier: workspace:*
         version: link:../../packages/shared

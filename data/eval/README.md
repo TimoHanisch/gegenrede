@@ -70,6 +70,33 @@ and claims whose detected language confidently disagrees with the `lang`
 label (diagnostic only, mirrors the eval run's `detectionAgrees`). The
 output reports locations as `file:line` and never echoes claim text.
 
+## Harvesting candidates (optional, semi-automated)
+
+```
+pnpm harvest --lang de --since 2026-05-01
+pnpm harvest --lang de --since 2026-05-01 --site some-other-publisher.example
+```
+
+Pulls ClaimReview records from the Google Fact Check Tools API (reusing the
+ingest connector; `GOOGLE_FC_API_KEY` required, env only) into a staging
+file `candidates-<lang>.jsonl` — **gitignored, never committed, never read
+by the eval**. Each candidate pre-fills `claim`/`expectedUrl`/`lang`/`source`
+plus review helpers (`rating`, `publishedAt`). Defaults to the
+`sources.json` publisher sites (in-index → positive candidates); pass
+`--site` with non-ingested publishers to find negative candidates. An
+existing staging file is never overwritten without `--force`; URLs already
+curated in the golden sets are skipped.
+
+**The harvested claim text must not be promoted verbatim.** It is the
+fact-checker's ClaimReview phrasing — the same text the index embeds — so
+copying it unchanged turns recall@5 into a self-match test. Review means:
+verify the claim really circulated, rephrase it to its circulating wording,
+drop the helper fields, set `expectedUrl` to `null` for negatives, then move
+the line into `golden-*.jsonl` and run `pnpm eval --validate` (which also
+rejects unedited candidate lines — the helper fields fail the strict golden
+schema). Record the methodology (harvested + manually reviewed, n of m
+accepted) on issue #15 so the eval report's provenance is honest.
+
 ## Curation guide (human-only, issue #15)
 
 Agents must never write these files; everything below is for the human

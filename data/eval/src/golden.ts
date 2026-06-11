@@ -7,11 +7,28 @@
 // aborts on the first bad line — it never skips one, because a silently
 // dropped item would skew the reported metrics.
 
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { z } from "zod";
 
 import { EvalError } from "./errors.js";
+
+/** data/eval — golden sets, candidate staging, and reports live here. */
+export const PACKAGE_ROOT = path.resolve(
+  fileURLToPath(import.meta.url),
+  "../..",
+);
+
+/** Every committed golden set: data/eval/golden-*.jsonl, sorted. */
+export async function discoverGoldenFiles(): Promise<string[]> {
+  const entries = await readdir(PACKAGE_ROOT);
+  return entries
+    .filter((name) => /^golden-.*\.jsonl$/.test(name))
+    .sort()
+    .map((name) => path.join(PACKAGE_ROOT, name));
+}
 
 /**
  * One golden item, one JSONL line. `expectedUrl` is the fact-check URL the

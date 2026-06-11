@@ -13,9 +13,8 @@
 // embedding, and exits 1 when validation fails — it IS the gate there.
 
 import { createHash } from "node:crypto";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 
 import { readSnapshot, type GgxSnapshot } from "@gegenrede/index-format";
@@ -28,7 +27,12 @@ import {
 } from "@gegenrede/shared";
 
 import { EvalError } from "./errors.js";
-import { loadGoldenFile, type LoadedGoldenItem } from "./golden.js";
+import {
+  PACKAGE_ROOT,
+  discoverGoldenFiles,
+  loadGoldenFile,
+  type LoadedGoldenItem,
+} from "./golden.js";
 import {
   buildReport,
   renderMarkdown,
@@ -43,9 +47,6 @@ import {
   type EvalRun,
 } from "./run-eval.js";
 import { renderValidationReport, validateGoldenFiles } from "./validate.js";
-
-// data/eval — golden sets and the default report directory live here.
-const PACKAGE_ROOT = path.resolve(fileURLToPath(import.meta.url), "../..");
 
 const USAGE = `Usage: pnpm eval --snapshot <path.ggx> [options]
        pnpm eval --validate [--golden <path>]
@@ -154,14 +155,6 @@ export function parseCliArgs(argv: string[]): CliConfig {
     topK,
     outDir: values.out ?? path.join(PACKAGE_ROOT, "reports"),
   };
-}
-
-async function discoverGoldenFiles(): Promise<string[]> {
-  const entries = await readdir(PACKAGE_ROOT);
-  return entries
-    .filter((name) => /^golden-.*\.jsonl$/.test(name))
-    .sort()
-    .map((name) => path.join(PACKAGE_ROOT, name));
 }
 
 function goldenInfoOf(
